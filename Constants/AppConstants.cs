@@ -12,5 +12,6 @@ namespace bot.aoe2.civpicker.Constants
         public const string LeaderBoardId = "leaderboard_id";
         public const string SteamId = "steam_id";
         public const string Count = "count";
+        public const string Units = "units";
     }
 }

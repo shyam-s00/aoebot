@@ -36,20 +36,33 @@ namespace bot.aoe2.civpicker.services
             playerMaps.TryAdd("128184187663417345", "76561198159403850"); // kronos
             
          }
-        
+
         public async Task<List<PlayerRating>> GetPlayerRatingsAsync(string playerId, int count = 1)
         {
             string steamId = "";
             playerMaps.TryGetValue(playerId, out steamId);
-            var url = new StringBuilder(AppConstants.Aoe2NetBaseUrl + AppConstants.PlayerRating);
-            AddParam(url, AppConstants.Game, Aoe2);
-            AddParam(url, AppConstants.LeaderBoardId, (int)Enumerations.LeaderBoard.Unranked);
-            AddParam(url, AppConstants.SteamId, steamId);
-            AddParam(url, AppConstants.Count, count);
+            if (string.IsNullOrEmpty(steamId))
+            {
+                var url = new StringBuilder(AppConstants.Aoe2NetBaseUrl + AppConstants.PlayerRating);
+                AddParam(url, AppConstants.Game, Aoe2);
+                AddParam(url, AppConstants.LeaderBoardId, (int)Enumerations.LeaderBoard.Unranked);
+                AddParam(url, AppConstants.SteamId, steamId);
+                AddParam(url, AppConstants.Count, count);
 
-            var playerRating = await Get<List<PlayerRating>>(url.ToString());
+                var playerRating = await Get<List<PlayerRating>>(url.ToString());
 
-            return playerRating;
+                return playerRating;
+            }
+            else
+                return new List<PlayerRating>();
+        }
+
+        public async Task<List<Units>> GetAllUnitsAsync()
+        {
+            var unitUrl = AppConstants.AoeHerokuBaseUrl + AppConstants.Units;
+
+            var units = await Get<List<Units>>(unitUrl, AppConstants.Units);
+            return units;
         }
 
         public async Task<List<Civlization>> GetCivilizationsAsync()
