@@ -48,7 +48,7 @@ namespace bot.aoe2.civpicker.Modules
             
 
             var list = await _aoeMatchUp.PickCivs(users.Take(8).ToList());
-            Emotes = await Context.Guild.GetEmotesAsync(RequestOptions.Default);
+            Emotes = Context.Client.Guilds.SelectMany(x => x.Emotes).ToList();
             
             var embed = CreateUserEmbed(list);
             await ReplyAsync($"{string.Join(",", users.Select(x => x.Mention))}", isTTS: false, embed: embed);
@@ -61,13 +61,8 @@ namespace bot.aoe2.civpicker.Modules
             return new EmbedBuilder{
                 Title = "Team Match",
                 ThumbnailUrl = "https://static.wikia.nocookie.net/ageofempires/images/3/3f/Age2de-library-boxart.jpg",
-                //Url = string.Format(TechTreeUrl, civName),
                 Fields = fields,
                 Color = Color.Red,
-                // Footer = new EmbedFooterBuilder {
-                //     Text = team,
-                //     IconUrl = string.Format(CivIconUrl, civName)
-                // }
             }.Build();
         }
 
@@ -76,10 +71,8 @@ namespace bot.aoe2.civpicker.Modules
             var civIcon = Emotes?.Where(x => x.Name == player.Civilization).FirstOrDefault();
             return new EmbedFieldBuilder
             {
-
                 Name = $"{player.UserMention} [{player?.Ratings?.Elo}] - {player.Team} - {player.PlayerColor}",
-                Value = $"[{player.Civilization}]({string.Format(TechTreeUrl, player.Civilization)})"
-                //<:{civIcon?.Name}:{civIcon?.Id}> - 
+                Value = $"<:{civIcon?.Name}:{civIcon?.Id}> - [{player.Civilization}]({string.Format(TechTreeUrl, player.Civilization)})"
             };
         }
 
