@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using bot.aoe2.civpicker.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text;
+using bot.aoe2.civpicker.Constants;
+using System.Collections.Concurrent;
 
 namespace bot.aoe2.civpicker.services
 {
@@ -14,8 +17,40 @@ namespace bot.aoe2.civpicker.services
     {
         private const string BASEURL = "https://age-of-empires-2-api.herokuapp.com/api/v1/";
         private const string Civilizations = "civilizations";
-        public AoeAPIService() { }
+
+        private const string Aoe2 = "aoe2de";
+
+        private readonly ConcurrentDictionary<string, string> playerMaps;
         
+        public AoeAPIService() {
+            playerMaps = new ConcurrentDictionary<string, string>();
+            playerMaps.TryAdd("736274349287407706", "76561198088035394"); //maniac
+            playerMaps.TryAdd("176022163491520513", "76561198032506144"); // glitch
+            playerMaps.TryAdd("163305625051201536", "76561198207690565"); // firehawk
+            playerMaps.TryAdd("128076865742176256", "76561198044613146"); // protox
+            playerMaps.TryAdd("186369989371101194", "76561198057496453"); // kuroko
+            playerMaps.TryAdd("693756257957576745", "76561198087325373"); // hawk
+            playerMaps.TryAdd("692033052540403712", "76561198115672759"); // lezion
+            playerMaps.TryAdd("685774329157648405", "76561198308551669"); // gunjack
+            playerMaps.TryAdd("477862232571510827", "76561198823747771"); // retemp
+            playerMaps.TryAdd("128184187663417345", "76561198159403850"); // kronos
+            
+         }
+        
+        public async Task<List<PlayerRating>> GetPlayerRatingsAsync(string playerId, int count = 1)
+        {
+            string steamId = "";
+            playerMaps.TryGetValue(playerId, out steamId);
+            var url = new StringBuilder(AppConstants.Aoe2NetBaseUrl + AppConstants.PlayerRating);
+            AddParam(url, AppConstants.Game, Aoe2);
+            AddParam(url, AppConstants.LeaderBoardId, (int)Enumerations.LeaderBoard.Unranked);
+            AddParam(url, AppConstants.SteamId, steamId);
+            AddParam(url, AppConstants.Count, count);
+
+            var playerRating = await Get<List<PlayerRating>>(url.ToString());
+
+            return playerRating;
+        }
 
         public async Task<List<Civlization>> GetCivilizationsAsync()
         {
@@ -25,7 +60,7 @@ namespace bot.aoe2.civpicker.services
             return civs;
         }
 
-        private async Task<T> Get<T>(string url, string key) where T : class
+        private async Task<T> Get<T>(string url, string key="") where T : class
         {
             try {
                 var request = WebRequest.Create(url) as HttpWebRequest;
@@ -37,11 +72,16 @@ namespace bot.aoe2.civpicker.services
                 }
 
                 var json = new StreamReader(response.GetResponseStream()).ReadToEnd();
-                var obj = JsonConvert.DeserializeObject<JObject>(json);
-                var jsonValue =  obj.GetValue(key)?.ToString();
-                //var test = obj as KeyValuePair<string, dynamic>;
-                
-                return JsonConvert.DeserializeObject<T>(jsonValue);
+                if (string.IsNullOrEmpty(key))
+                {
+                    return JsonConvert.DeserializeObject<T>(json);
+                }
+                else
+                {
+                    var obj = JsonConvert.DeserializeObject<JObject>(json);
+                    var jsonValue =  obj.GetValue(key)?.ToString();
+                    return JsonConvert.DeserializeObject<T>(jsonValue);
+                }
             }
             catch(Exception ex)
             {
@@ -49,6 +89,18 @@ namespace bot.aoe2.civpicker.services
             }
 
             return default(T);
+        }
+
+        private StringBuilder AddParam(StringBuilder URI, string paramName, object paramValue)
+        {
+            if (!string.IsNullOrEmpty(paramValue?.ToString()))
+            {
+                if (URI.ToString().Contains("?"))
+                    return URI.Append("&" + paramName + $"={paramValue}");
+                else
+                    return URI.Append("?" + paramName + $"={paramValue}");
+            }
+            return URI;
         }
     }
 }

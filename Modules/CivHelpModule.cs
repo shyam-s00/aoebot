@@ -15,6 +15,7 @@ namespace bot.aoe2.civpicker.Modules
     {
         private readonly AoeAPIService _aoeApi;
         private readonly AoeMatchUpService _aoeMatchUp;
+        private IReadOnlyCollection<GuildEmote> Emotes;
         private const string TechTreeUrl = "https://ageofempires.fandom.com/wiki/{0}/Tree";
         private const string CivIconUrl = "https://tools.unfamiliarplace.com/aoe2civs/assets/crests/CivIcon-{0}.png";
 
@@ -36,36 +37,20 @@ namespace bot.aoe2.civpicker.Modules
             await ReplyAsync(message);
         }
 
-        [Command("team4"), Alias("t4")]
+       
+
+        [Command("team"), Alias("t")]
         [Summary("Match up 4v4 team with Random civs")]
         [RequireContext(ContextType.Guild)]
         [RequireUserPermission(GuildPermission.UseExternalEmojis)]
-        public async Task TagACiv(params SocketUser[] users)
+        public async Task TagCivEightPlayer(params SocketUser[] users)
         {
+            
+
             var list = await _aoeMatchUp.PickCivs(users.Take(8).ToList());
-            var emotes = await Context.Guild.GetEmotesAsync(RequestOptions.Default);
+            Emotes = await Context.Guild.GetEmotesAsync(RequestOptions.Default);
+            
             var embed = CreateUserEmbed(list);
-            //list.ForEach(async x => await ReplyAsync(x.UserMention, embed: CreateUserEmbed(x.Civilization, x.Team.ToString(), x.PlayerColor)));
-
-            // var test = new EmbedBuilder {
-
-            //     //Description = "Britons",
-            //     Title = "Britons",
-            //     Url = "https://ageofempires.fandom.com/wiki/Britons/Tree",
-            //     //ImageUrl = "https://discordapp.com/assets/e4923594e694a21542a489471ecffa50.svg",
-            //     //Fields = new[] { fields }.ToList(),
-            //     // Fields = new System.Collections.Generic.List<EmbedFieldBuilder> {
-            //     //     new EmbedFieldBuilder()
-            //     //         .WithName(users[0].ToString())
-            //     //         .WithValue("[Britons](https://ageofempires.fandom.com/wiki/Britons/Tree)")
-            //     // },
-            //     Color = Color.Red,
-            //     Footer = new EmbedFooterBuilder {
-            //         Text = "Team 2",
-            //         IconUrl = "https://tools.unfamiliarplace.com/aoe2civs/assets/crests/CivIcon-Burmese.png"
-            //     },
-            // }.Build();           
-
             await ReplyAsync($"{string.Join(",", users.Select(x => x.Mention))}", isTTS: false, embed: embed);
            
         }
@@ -86,11 +71,17 @@ namespace bot.aoe2.civpicker.Modules
             }.Build();
         }
 
-        private EmbedFieldBuilder CreateUserField(Player player) => new EmbedFieldBuilder
+        private EmbedFieldBuilder CreateUserField(Player player)
         {
-            Name = $"{player.UserMention} - {player.Team} - {player.PlayerColor}",
-            Value = $":{player.Civilization}: - [{player.Civilization}]({string.Format(TechTreeUrl, player.Civilization)})"
-        };
+            var civIcon = Emotes?.Where(x => x.Name == player.Civilization).FirstOrDefault();
+            return new EmbedFieldBuilder
+            {
+
+                Name = $"{player.UserMention} [{player?.Ratings?.Elo}] - {player.Team} - {player.PlayerColor}",
+                Value = $"[{player.Civilization}]({string.Format(TechTreeUrl, player.Civilization)})"
+                //<:{civIcon?.Name}:{civIcon?.Id}> - 
+            };
+        }
 
         private Embed CreateUserEmbed(string civName, string team, Color playerColor)
         {

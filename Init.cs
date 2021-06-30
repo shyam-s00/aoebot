@@ -17,7 +17,7 @@ namespace bot.aoe2.civpicker
         public Init()
         {
             var configBuilder = new ConfigurationBuilder()
-                .AddInMemoryCollection(new[] { KeyValuePair.Create("token", "ODU4OTI2NTI5NzU2Mzk3NTc4.YNlPqg.r9nyfH4eNQ6HMakwSQ9my8nXIb0"), KeyValuePair.Create("prefix", "!") });
+                .AddInMemoryCollection(new[] { KeyValuePair.Create("token", "<Token>"), KeyValuePair.Create("prefix", "!") });
 
             _configuration = configBuilder.Build();
         }

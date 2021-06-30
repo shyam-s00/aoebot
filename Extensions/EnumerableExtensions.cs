@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace bot.aoe2.civpicker.Extensions
 {
@@ -19,6 +20,11 @@ namespace bot.aoe2.civpicker.Extensions
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
             return source.OrderBy(x => Guid.NewGuid());
+        }
+
+        public static async Task<IEnumerable<T1>> SelectManyAsync<T, T1>(this IEnumerable<T> enumeration, Func<T, Task<List<T1>>> func)
+        {
+            return (await Task.WhenAll(enumeration.Select(func))).SelectMany(s => s);
         }
     }
 }
