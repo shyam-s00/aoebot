@@ -59,7 +59,7 @@ namespace bot.aoe2.civpicker.services
             // ratings = playerRatings.ToList();
 
             PlayerColors = new Stack<string>(TeamColors1.Shuffle());
-            var civList = response?.Select(x =>x.Name).Append(Burgundians).Append(Sicilians).ToList();     
+            var civList = response?.Select(x =>x.Name).ToList();     
             return users.Select((x,y) => CreatePlayer(civList.PickRandom(), y, x.Username, teamSize, x.Id.ToString())).ToList();
 
         }

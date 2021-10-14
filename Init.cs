@@ -8,6 +8,7 @@ using Discord.WebSocket;
 using Discord.Commands;
 
 using bot.aoe2.civpicker.services;
+using System;
 
 namespace bot.aoe2.civpicker
 {
@@ -16,8 +17,9 @@ namespace bot.aoe2.civpicker
         private readonly IConfigurationRoot _configuration;
         public Init()
         {
+            var token = Environment.GetEnvironmentVariables()["DISCORD_TOKEN"]?.ToString();
             var configBuilder = new ConfigurationBuilder()
-                .AddInMemoryCollection(new[] { KeyValuePair.Create("token", "<Token>"), KeyValuePair.Create("prefix", "!") });
+                .AddInMemoryCollection(new[] { KeyValuePair.Create("token", token), KeyValuePair.Create("prefix", "!") });
 
             _configuration = configBuilder.Build();
         }

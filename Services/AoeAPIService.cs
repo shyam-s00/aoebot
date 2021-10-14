@@ -41,7 +41,7 @@ namespace bot.aoe2.civpicker.services
         {
             string steamId = "";
             playerMaps.TryGetValue(playerId, out steamId);
-            if (string.IsNullOrEmpty(steamId))
+            if (!string.IsNullOrEmpty(steamId))
             {
                 var url = new StringBuilder(AppConstants.Aoe2NetBaseUrl + AppConstants.PlayerRating);
                 AddParam(url, AppConstants.Game, Aoe2);
@@ -59,17 +59,27 @@ namespace bot.aoe2.civpicker.services
 
         public async Task<List<Units>> GetAllUnitsAsync()
         {
-            var unitUrl = AppConstants.AoeHerokuBaseUrl + AppConstants.Units;
+            //var unitUrl = AppConstants.AoeHerokuBaseUrl + AppConstants.Units;
+            var cwd = Directory.GetCurrentDirectory();
+            var path = cwd + "/Data/units.json";
+            var json = await File.ReadAllTextAsync(path);
 
-            var units = await Get<List<Units>>(unitUrl, AppConstants.Units);
+            var units = JsonConvert.DeserializeObject<List<Units>>(json);
+
+            //var units = await Get<List<Units>>(unitUrl, AppConstants.Units);
             return units;
         }
 
         public async Task<List<Civlization>> GetCivilizationsAsync()
         {
-            var civUrl = BASEURL + Civilizations;
-            
-            var civs = await Get<List<Civlization>>(civUrl, Civilizations);
+            //var civUrl = BASEURL + Civilizations;            
+            //var civs = await Get<List<Civlization>>(civUrl, Civilizations);
+            var cwd = Directory.GetCurrentDirectory();
+            var path = cwd + "/Data/civs.json";
+            var json = await File.ReadAllTextAsync(path);
+
+            var civs = JsonConvert.DeserializeObject<List<Civlization>>(json);
+
             return civs;
         }
 

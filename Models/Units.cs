@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
@@ -41,15 +42,15 @@ namespace bot.aoe2.civpicker.Models
 
         [DataMember(Name = "reload_time", EmitDefaultValue = false)]
         [JsonPropertyName("reload_time")]
-        public decimal ReloadTime { get; set; }
+        public decimal? ReloadTime { get; set; }
 
         [DataMember(Name = "attack_delay", EmitDefaultValue = false)]
         [JsonPropertyName("attack_delay")]
-        public decimal AttackDelay { get; set; }
+        public decimal? AttackDelay { get; set; }
 
         [DataMember(Name = "movement_rate", EmitDefaultValue = false)]
         [JsonPropertyName("movement_rate")]
-        public decimal MovementRate { get; set; }
+        public decimal? MovementRate { get; set; }
 
         [DataMember(Name = "line_of_sight", EmitDefaultValue = false)]
         [JsonPropertyName("line_of_sight")]
@@ -73,15 +74,15 @@ namespace bot.aoe2.civpicker.Models
 
         [DataMember(Name = "attack_bonus", EmitDefaultValue = false)]
         [JsonPropertyName("attack_bonus")]
-        public List<string> AttackBonus { get; set; }
+        public string AttackBonus { get; set; }
 
         [DataMember(Name = "armor_bonus", EmitDefaultValue = false)]
         [JsonPropertyName("armor_bonus")]
-        public List<string> ArmorBonus { get; set; }
+        public string ArmorBonus { get; set; }
 
         [DataMember(Name = "search_radius", EmitDefaultValue = false)]
         [JsonPropertyName("search_radius")]
-        public int SearchRadius { get; set; }
+        public int? SearchRadius { get; set; }
 
         [DataMember(Name = "accuracy", EmitDefaultValue = false)]
         [JsonPropertyName("accuracy")]
@@ -89,6 +90,12 @@ namespace bot.aoe2.civpicker.Models
 
         [DataMember(Name = "blast_radius", EmitDefaultValue = false)]
         [JsonPropertyName("blast_radius")]
-        public decimal BlastRadius { get; set; }
+        public decimal? BlastRadius { get; set; }
+
+        [JsonIgnore]
+        public List<string> AttackBonusList => this.AttackBonus?.Split(";")?.ToList();
+
+        [JsonIgnore]
+        public List<string> ArmorBonusList => this.ArmorBonus?.Split(";")?.ToList();
     }
 }

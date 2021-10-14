@@ -8,6 +8,7 @@ using System.IO;
 using Discord.WebSocket;
 using System.Collections.Generic;
 using bot.aoe2.civpicker.Models;
+using System;
 
 namespace bot.aoe2.civpicker.Modules
 {
@@ -18,6 +19,7 @@ namespace bot.aoe2.civpicker.Modules
         private readonly AoeMatchUpService _aoeMatchUp;
         private IReadOnlyCollection<GuildEmote> _emotes;
         private IReadOnlyCollection<Units> _units;
+        private IReadOnlyCollection<Civlization> _civs;
         private const string TechTreeUrl = "https://ageofempires.fandom.com/wiki/{0}/Tree";
         private const string CivIconUrl = "https://tools.unfamiliarplace.com/aoe2civs/assets/crests/CivIcon-{0}.png";
 
@@ -27,6 +29,7 @@ namespace bot.aoe2.civpicker.Modules
             _aoeMatchUp = aoeMatchUp;
             
             _units = _units ?? _aoeApi.GetAllUnitsAsync().GetAwaiter().GetResult();
+            _civs = _civs ?? _aoeApi.GetCivilizationsAsync().GetAwaiter().GetResult();
         }
 
         [Command("list")]
@@ -57,6 +60,32 @@ namespace bot.aoe2.civpicker.Modules
                     foreach (var u in filteredUnit)
                     {
                         var embed = CreateUnitEmbed(u);
+                        await ReplyAsync(embed: embed);
+                    }
+                }
+            }
+            else 
+            {
+                await ReplyAsync("Unit not found. Search with id (1 - 104) or with name");
+            }
+        }
+
+        [Command("civs"), Alias("c")]
+        [Summary("Get  civ details")]
+        public async Task ViewCivs(string civ)
+        {
+            var filteredUnit = _civs.Where(x => x.Id.ToString() == civ || x.Name.Contains(civ, System.StringComparison.OrdinalIgnoreCase));
+            if (filteredUnit != null && filteredUnit.Any())
+            {
+                if (filteredUnit.Count() > 1)
+                {
+                    await ReplyAsync(embed: TooManyCivs(filteredUnit));
+                }
+                else
+                {
+                    foreach (var u in filteredUnit)
+                    {
+                        var embed = CreateCivEmbed(u);
                         await ReplyAsync(embed: embed);
                     }
                 }
@@ -100,6 +129,15 @@ namespace bot.aoe2.civpicker.Modules
             }.Build();
         }
 
+        private Embed TooManyCivs(IEnumerable<Civlization> civ)
+        {
+            return new EmbedBuilder
+            {
+                Title = "More than one Civ...",
+                Description = string.Join("\r\n", civ.Select(x=> $"Id: {x.Id} -> Name: {x.Name}"))
+            }.Build();
+        }
+
         private Embed CreateUnitEmbed(Units unit)
         {
             // var fields = new List<EmbedFieldBuilder> {
@@ -108,7 +146,7 @@ namespace bot.aoe2.civpicker.Modules
             //         CreateUnitField("Armor", unit.Armor.ToString()),
             //         CreateUnitField("Attack Bonous", unit.AttackBonus != null ? string.Join("\r\n", unit.AttackBonus) : "NA")
             //     };
-            var attackBonus = unit.AttackBonus != null ? CreateUnOrderList(unit.AttackBonus) : "NA";
+            var attackBonus = unit.AttackBonus != null ? CreateUnOrderList(unit.AttackBonusList) : "NA";
             return new EmbedBuilder
             {
                 Title = unit.Name,
@@ -118,9 +156,21 @@ namespace bot.aoe2.civpicker.Modules
             }.Build();
         }
 
+        private Embed CreateCivEmbed(Civlization civ)
+        {   
+            var civBonus = civ.CivBonus != null ? CreateUnOrderList(civ.CivilizationBonus) : "NA";
+            return new EmbedBuilder
+            {
+                Title = civ.Name,
+                Description = $":arrow_right: Id: {civ.Id} \r\n :arrow_right: Type: {civ.ArmyType} \r\n :arrow_right: Unique Unit: {civ.UniqueUnit} \r\n :arrow_right: Team Bonus: {civ.TeamBonus} \r\n :arrow_right: Civ Bonus: \n{civBonus}",
+                Color = Color.Green,
+                //Footer = new EmbedFooterBuilder().WithText($"{unit.Cost.ToString()}")
+            }.Build();
+        }
+
         private string CreateUnOrderList(List<string> items)
         {
-            var li = string.Join("\n", items?.Select(x => $"      -> {x}"));
+            var li = string.Join("\n", items?.Select(x => $"   ----> {x}"));
             return @$"{li}";
         }
         private EmbedFieldBuilder CreateUnitField(string fieldName, string fieldValue)

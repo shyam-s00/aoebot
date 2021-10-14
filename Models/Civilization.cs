@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
@@ -25,11 +26,11 @@ namespace bot.aoe2.civpicker.Models
 
         [DataMember(Name = "unique_unit", EmitDefaultValue = false)]
         [JsonPropertyName("unique_unit")]
-        public List<string> UniqueUnit { get; set; }
+        public string UniqueUnit { get; set; }
 
         [DataMember(Name = "unique_tech", EmitDefaultValue = false)]
         [JsonPropertyName("unique_tech")]
-        public List<string> UniqueTech { get; set; }
+        public string UniqueTech { get; set; }
 
         [DataMember(Name = "team_bonus", EmitDefaultValue = false)]
         [JsonPropertyName("team_bonus")]
@@ -37,6 +38,9 @@ namespace bot.aoe2.civpicker.Models
 
         [DataMember(Name = "civilization_bonus", EmitDefaultValue = false)]
         [JsonPropertyName("civilization_bonus")]
-        public List<string> CivBonus { get; set; }
+        public string CivBonus { get; set; }
+
+        [JsonIgnore]
+        public List<string> CivilizationBonus => this.CivBonus?.Split(";")?.ToList();
     }
 }

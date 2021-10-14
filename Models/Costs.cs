@@ -22,9 +22,9 @@ namespace bot.aoe2.civpicker.Models
         [JsonPropertyName("Gold")]
         public int Gold { get; set; }
 
-        public override string ToString()
-        {
-            return ((Wood == 0) ? "" : $"Wood: {Wood} ") + ((Food == 0) ? "" : $"Food: {Food} ") + ((Stone == 0) ? "" : $"Stone: {Stone} ") + ((Gold == 0) ? "" : $"Gold: {Gold} ");
-        }
+        public override string ToString() => ((Wood == 0) ? "" : $"Wood: {Wood} ")
+                                             + ((Food == 0) ? "" : $"Food: {Food} ")
+                                             + ((Stone == 0) ? "" : $"Stone: {Stone} ")
+                                             + ((Gold == 0) ? "" : $"Gold: {Gold} ");
     }
 }
